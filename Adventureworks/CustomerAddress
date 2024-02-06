@@ -57,3 +57,23 @@ ON C.CustomerID = CA.CustomerID
 JOIN SalesLT.Address AS A
 ON CA.AddressID = A.AddressID
 WHERE CA.AddressType = 'Shipping'
+
+/*
+The query below dispalys company name that has a 'Main Office' address and  a 'Shipping' address.
+*/
+
+SELECT C.CompanyName
+FROM SalesLT.Customer AS C
+JOIN SalesLT.CustomerAddress AS CA
+ON C.CustomerID = CA.CustomerID
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+WHERE CA.AddressType = 'Shipping'
+INTERSECT
+SELECT C.CompanyName
+FROM SalesLT.Customer AS C
+JOIN SalesLT.CustomerAddress AS CA
+ON C.CustomerID = CA.CustomerID
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+WHERE CA.AddressType = 'Main Office'
