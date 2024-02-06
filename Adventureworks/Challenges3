@@ -1,0 +1,88 @@
+1) Generate invoice reports
+-- Adventure Works Cycles sells directly to retailers, who must be invoiced for their orders. You have been tasked with writing a query to generate a list of invoices to be sent to customers.
+-- Write a query that returns the company name from the SalesLT.Customer table, and the sales order ID and total due from the SalesLT.SalesOrderHeader table.
+
+SELECT C.CompanyName,SOH.SalesOrderID,SOH.TotalDue
+FROM SalesLT.Customer AS C
+JOIN SalesLT.SalesOrderHeader AS SOH
+ON C.CustomerID = SOH.CustomerID
+
+-- Retrieve customer orders with addresses
+-- Extend your customer orders query to include the Main Office address for each customer, including the full street address, city, state or province, postal code, and country or region
+-- Tip: Note that each customer can have multiple addressees in the SalesLT.Address table, so the database developer has created the SalesLT.CustomerAddress table to enable a many-to-many relationship between customers and addresses. 
+-- Your query will need to include both of these tables, and should filter the results so that only Main Office addresses are included.
+
+SELECT 
+    C.CompanyName, A.AddressLine1, ISNULL(A.AddressLine2, '') AS AddressLine2, 
+    A.City, A.StateProvince, A.PostalCode, A.CountryRegion, SOH.SalesOrderID, SOH.TotalDue
+FROM SalesLT.Customer AS C
+JOIN SalesLT.SalesOrderHeader AS SOH
+ON C.CustomerID = SOH.CustomerID
+JOIN SalesLT.CustomerAddress AS CA
+ON C.CustomerID = CA.CustomerID AND AddressType = 'Main Office'
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+
+2) Retrieve customer data
+-- As you continue to work with the Adventure Works customer and sales data, you must create queries for reports that have been requested by the sales team.
+-- Retrieve a list of all customers and their orders
+-- The sales manager wants a list of all customer companies and their contacts (first name and last name), showing the sales order ID and total due for each order they have placed. 
+-- Customers who have not placed any orders should be included at the bottom of the list with NULL values for the order ID and total due.
+
+SELECT 
+    C.CompanyName, C.FirstName, C.LastName,
+    SOH.SalesOrderID, SOH.TotalDue
+FROM SalesLT.Customer AS C
+LEFT JOIN SalesLT.SalesOrderHeader AS SOH
+ON C.CustomerID = SOH.CustomerID
+ORDER BY SOH.SalesOrderID DESC
+
+-- Retrieve a list of customers with no address
+-- A sales employee has noticed that Adventure Works does not have address information for all customers. 
+--You must write a query that returns a list of customer IDs, company names, contact names (first name and last name), and phone numbers for customers with no address stored in the database.
+
+SELECT 
+    C.CustomerID, C.CompanyName, C.FirstName, C.LastName,C.phone
+FROM SalesLT.Customer AS C
+LEFT JOIN SalesLT.CustomerAddress AS CA 
+ON C.CustomerID = CA.CustomerID
+WHERE CA.AddressID IS NULL
+
+-- Retrieving Sales Data
+--Some customers have never placed orders, and some products have never been ordered.
+--Write a query that returns a column of customer IDs for customers who have never placed an order, and a column of product IDs for products that have never been ordered.
+-- Each row with a customer ID should have a NULL product ID (because the customer has never ordered a product) and each row with a product ID should have a NULL customer ID (because the product has never been ordered by a customer).
+
+SELECT C.CustomerID, P.ProductID
+FROM SalesLT.Customer AS C
+FULL JOIN SalesLT.SalesOrderHeader AS SOH
+ON C.CustomerID = SOH.CustomerID
+FULL JOIN SalesLT.SalesOrderDetail AS SOD
+ON SOD.SalesOrderID = SOH.SalesOrderID
+FULL JOIN SalesLT.Product AS P
+ON P.ProductID = SOD.ProductID
+WHERE SOH.SalesOrderID IS NULL
+ORDER BY ProductID, CustomerID
+
+-- Create a product catalog
+-- The marketing team has asked you to retrieve data for a new product catalog.
+-- Retrieve product information by category.
+
+SELECT
+    P.ProductID, P.Name AS ProductName, 
+    PC.Name AS CategoryName, 
+    PM.Name AS ModelName, 
+    P.Color, P.Size, P.Weight, P.StandardCost, P.ListPrice,
+    CONVERT(nvarchar(30), P.SellStartDate, 102) AS SellStartDate,
+    CONVERT(nvarchar(30), P.SellEndDate, 102) AS SellEndDate,
+    PD.Description,PMD.Culture
+FROM SalesLT.Product AS P
+JOIN SalesLT.ProductCategory PC
+ON P.ProductCategoryID = PC.ProductCategoryID
+JOIN SalesLT.ProductModel AS PM 
+ON P.ProductModelID = PM.ProductModelID
+JOIN SalesLT.ProductModelProductDescription AS PMD
+ON P.ProductModelID = PMD.ProductModelID
+JOIN SalesLT.ProductDescription AS PD
+ON PD.ProductDescriptionID = PMD.ProductDescriptionID
+ORDER BY P.SellEndDate DESC
