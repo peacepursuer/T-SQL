@@ -1,0 +1,59 @@
+/*
+Retrieving Customer Addresses
+Customers can have two kinds of address; 
+A main office address and a shipping address. The accounts department wants to ensure that the main office address is always used for billing,
+and you've been asked to write a query that clearly identifies the different types of address for each customer.
+Write a query that retrieves the name of company, AddressLine1, City, StateProvince and Country.
+Also create a column named AddressType for value 'Billing Address' for customers where the address type is 'Main Office'.
+*/
+
+SELECT C.CompanyName, A.AddressLine1, A.City, 
+A.StateProvince, A.CountryRegion,
+'Billing Address' AS AddressType
+FROM SalesLT.Customer AS C
+JOIN SalesLT.CustomerAddress AS CA
+ON c.CustomerID = ca.CustomerID
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+WHERE CA.AddressType = 'Main Office'
+
+/*
+Retrieving Customer Addresses
+Customers can have two kinds of address; 
+A main office address and a shipping address. The accounts department wants to ensure that the shipping address is always used for shipping,
+and you've been asked to write a query that clearly identifies the different types of address for each customer.
+Write a query that retrieves the name of company, AddressLine1, City, StateProvince and Country.
+Also create a column named AddressType for value 'Shipping Address' for customers where the address type is 'Shipping'.
+*/
+
+SELECT C.CompanyName, A.AddressLine1, A.City,
+A.StateProvince, A.CountryRegion,'Shipping Address' AS AddressType
+FROM SalesLT.Customer AS C
+JOIN SalesLT.CustomerAddress AS CA
+ON C.CustomerID = CA.CustomerID
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+WHERE CA.AddressType = 'Shipping'
+
+/*
+Now we append both table together to have our address in one table using 'UNION ALL'
+*/
+
+SELECT C.CompanyName, A.AddressLine1, A.City, 
+A.StateProvince, A.CountryRegion,
+'Billing Address' AS AddressType
+FROM SalesLT.Customer AS C
+JOIN SalesLT.CustomerAddress AS CA
+ON c.CustomerID = ca.CustomerID
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+WHERE CA.AddressType = 'Main Office'
+UNION ALL
+SELECT C.CompanyName, A.AddressLine1, A.City,
+A.StateProvince, A.CountryRegion,'Shipping Address' AS AddressType
+FROM SalesLT.Customer AS C
+JOIN SalesLT.CustomerAddress AS CA
+ON C.CustomerID = CA.CustomerID
+JOIN SalesLT.Address AS A
+ON CA.AddressID = A.AddressID
+WHERE CA.AddressType = 'Shipping'
